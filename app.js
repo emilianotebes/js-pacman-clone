@@ -1,59 +1,41 @@
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var app = express();
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 
-var App = function (_React$Component) {
-    _inherits(App, _React$Component);
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
-    function App() {
-        _classCallCheck(this, App);
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 
-        return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
-    }
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
 
-    _createClass(App, [{
-        key: "render",
-        value: function render() {
-            return React.createElement(
-                "div",
-                { className: "shopping-list" },
-                React.createElement(
-                    "h1",
-                    null,
-                    "PAC MAN"
-                ),
-                React.createElement(
-                    "h1",
-                    null,
-                    "Shopping List for ",
-                    this.props.name
-                ),
-                React.createElement(
-                    "ul",
-                    null,
-                    React.createElement(
-                        "li",
-                        null,
-                        "Instagram"
-                    ),
-                    React.createElement(
-                        "li",
-                        null,
-                        "WhatsApp"
-                    ),
-                    React.createElement(
-                        "li",
-                        null,
-                        "Oculus"
-                    )
-                )
-            );
-        }
-    }]);
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    return App;
-}(React.Component);
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+module.exports = app;
